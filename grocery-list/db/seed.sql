@@ -1,3 +1,5 @@
+TRUNCATE TABLE items RESTART IDENTITY;
+
 INSERT INTO items (name, category, purchased)
 VALUES
     ('Milk', 'dairy', false),
