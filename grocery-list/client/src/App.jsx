@@ -46,6 +46,12 @@ function App() {
     }).then(() => fetchItems());
   }
 
+  function deleteItem(id) {
+    fetch(`http://localhost:3000/api/items/${id}`, {
+      method: "DELETE",
+    }).then(() => fetchItems());
+  }
+
   return (
     <div style={{ padding: "1rem", maxWidth: "400px" }}>
       <h1>Grocery List</h1>
@@ -78,7 +84,7 @@ function App() {
       {/* ITEM LIST */}
       <ul>
         {items.map((item) => (
-          <li key={item.id}>
+          <li key={item.id} style={{ display: "flex", alignItems: "center" }}>
             <input
               type="checkbox"
               checked={item.purchased}
@@ -89,10 +95,13 @@ function App() {
               style={{
                 textDecoration: item.purchased ? "line-through" : "none",
                 marginLeft: "0.5rem",
+                flexGrow: 1,
               }}
             >
               {item.name} ({item.category})
             </span>
+
+            <button onClick={() => deleteItem(item.id)}>❌</button>
           </li>
         ))}
       </ul>
