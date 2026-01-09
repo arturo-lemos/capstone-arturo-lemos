@@ -49,6 +49,27 @@ app.post("/api/items", async (req, res) => {
   }
 });
 
+app.put("/api/items/:id", async (req, res) => {
+  const { id } = req.params;
+  const { purchased } = req.body;
+
+  try {
+    const result = await query(
+      "UPDATE items SET purchased = $1 WHERE id = $2 RETURNING *;",
+      [purchased, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update item" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

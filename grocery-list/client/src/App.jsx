@@ -6,35 +6,54 @@ function App() {
   const [category, setCategory] = useState("produce");
 
   useEffect(() => {
+    fetchItems();
+  }, []);
+
+  function fetchItems() {
     fetch("http://localhost:3000/api/items")
       .then((res) => res.json())
       .then((data) => setItems(data))
       .catch((err) => console.error(err));
-  }, []);
+  }
 
-  const handleSubmit = async (e) => {
+  function addItem(e) {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:3000/api/items", {
+    if (!name.trim()) return;
+
+    fetch("http://localhost:3000/api/items", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name, category }),
-    });
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setName("");
+        setCategory("produce");
+        fetchItems();
+      });
+  }
 
-    const newItem = await res.json();
-    setItems([...items, newItem]);
-    setName("");
-    setCategory("produce");
-  };
+  function togglePurchased(item) {
+    fetch(`http://localhost:3000/api/items/${item.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ purchased: !item.purchased }),
+    }).then(() => fetchItems());
+  }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "500px", margin: "auto" }}>
+    <div style={{ padding: "1rem", maxWidth: "400px" }}>
       <h1>Grocery List</h1>
 
-      <form onSubmit={handleSubmit}>
+      {/* ADD ITEM FORM */}
+      <form onSubmit={addItem} style={{ marginBottom: "1rem" }}>
         <input
+          type="text"
           placeholder="Item name"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -53,13 +72,27 @@ function App() {
           <option value="misc">Misc</option>
         </select>
 
-        <button type="submit">Add Item</button>
+        <button type="submit">Add</button>
       </form>
 
+      {/* ITEM LIST */}
       <ul>
         {items.map((item) => (
           <li key={item.id}>
-            {item.name} ({item.category})
+            <input
+              type="checkbox"
+              checked={item.purchased}
+              onChange={() => togglePurchased(item)}
+            />
+
+            <span
+              style={{
+                textDecoration: item.purchased ? "line-through" : "none",
+                marginLeft: "0.5rem",
+              }}
+            >
+              {item.name} ({item.category})
+            </span>
           </li>
         ))}
       </ul>
